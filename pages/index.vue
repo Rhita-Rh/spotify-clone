@@ -8,18 +8,12 @@
       <!-- Header -->
       <header class="p-4 bg-gray-900">
         <div class="flex justify-between items-center">
-          <!-- Search Bar -->
-          <div class="relative flex-1 max-w-2xl">
-            <input
-              v-model="searchQuery"
-              @input="handleSearch"
-              type="text"
-              placeholder="Rechercher des artistes, des chansons ou des playlists..."
-              class="w-full px-4 py-2 bg-gray-800 text-white rounded-full focus:outline-none focus:ring-2 focus:ring-green-500"
-            />
-            <span class="absolute right-4 top-2 text-gray-400">
-              <i class="material-icons">search</i>
-            </span>
+          <!-- Welcome Message -->
+          <div class="flex-1">
+            <h1 class="text-2xl font-bold text-white">
+              {{ greetingMessage }}, {{ userName || 'utilisateur' }} !
+            </h1>
+            <p class="text-gray-400">Bienvenue sur Melodify</p>
           </div>
 
           <!-- Profile Section -->
@@ -77,92 +71,8 @@
         </div>
       </header>
 
-      <!-- Search Results -->
-      <div v-if="searchResults.length > 0" class="p-8">
-        <h2 class="text-2xl font-bold mb-4">Résultats de recherche</h2>
-        
-        <!-- Artists -->
-        <div v-if="searchResults.artists?.items.length" class="mb-8">
-          <h3 class="text-xl font-semibold mb-4">Artistes</h3>
-          <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-            <div
-              v-for="artist in searchResults.artists.items"
-              :key="artist.id"
-              class="bg-gray-800 p-4 rounded-lg hover:bg-gray-700 transition duration-200 ease-in-out transform hover:scale-105"
-            >
-              <img
-                :src="artist.images[0]?.url || require('~/assets/default-album.png')"
-                :alt="artist.name"
-                class="w-full h-40 object-cover mb-2 rounded-full"
-              />
-              <h3 class="text-lg font-semibold text-center">{{ artist.name }}</h3>
-              <p class="text-gray-400 text-sm text-center">Artiste</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Tracks -->
-        <div v-if="searchResults.tracks?.items.length" class="mb-8">
-          <h3 class="text-xl font-semibold mb-4">Chansons</h3>
-          <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-            <div
-              v-for="track in searchResults.tracks.items"
-              :key="track.id"
-              class="bg-gray-800 p-4 rounded-lg hover:bg-gray-700 transition duration-200 ease-in-out transform hover:scale-105"
-            >
-              <img
-                :src="track.album.images[0]?.url || require('~/assets/default-album.png')"
-                :alt="track.name"
-                class="w-full h-40 object-cover mb-2 rounded"
-              />
-              <h3 class="text-lg font-semibold">{{ track.name }}</h3>
-              <p class="text-gray-400 text-sm">{{ track.artists[0]?.name }}</p>
-              <button
-                @click="playTrack(track.uri)"
-                class="mt-2 w-full bg-green-500 hover:bg-green-600 text-white py-1 px-2 rounded"
-              >
-                Écouter
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Playlists -->
-        <div v-if="searchResults.playlists?.items.length" class="mb-8">
-          <h3 class="text-xl font-semibold mb-4">Playlists</h3>
-          <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-            <div
-              v-for="playlist in searchResults.playlists.items"
-              :key="playlist.id"
-              class="bg-gray-800 p-4 rounded-lg hover:bg-gray-700 transition duration-200 ease-in-out transform hover:scale-105"
-            >
-              <img
-                :src="playlist.images[0]?.url || require('~/assets/default-album.png')"
-                :alt="playlist.name"
-                class="w-full h-40 object-cover mb-2 rounded"
-              />
-              <h3 class="text-lg font-semibold">{{ playlist.name }}</h3>
-              <p class="text-gray-400 text-sm">Par {{ playlist.owner.display_name }}</p>
-              <button
-                @click="playPlaylist(playlist.uri)"
-                class="mt-2 w-full bg-green-500 hover:bg-green-600 text-white py-1 px-2 rounded"
-              >
-                Écouter
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Section Accueil -->
-      <section v-else class="p-8 bg-gradient-to-b from-gray-800 to-black">
-        <!-- Bannière -->
-        <div class="mb-6">
-          <h1 class="text-3xl font-bold">
-            {{ greetingMessage }}, {{ userName || 'utilisateur' }} !
-          </h1>
-        </div>
-
+      <!-- Main Content -->
+      <section class="p-8 bg-gradient-to-b from-gray-800 to-black">
         <!-- Section Écoutés récemment -->
         <div v-if="recentlyPlayed && recentlyPlayed.length" class="mb-8">
           <h2 class="text-2xl font-bold mb-4">Écoutés récemment</h2>
@@ -178,12 +88,20 @@
                   :alt="track?.name || 'Unknown track'"
                   class="w-full h-40 object-cover mb-2 rounded"
                 />
-                <button
-                  @click="playTrack(track.uri)"
-                  class="absolute bottom-2 right-2 bg-green-500 p-3 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                >
-                  <i class="material-icons">play_arrow</i>
-                </button>
+                <div class="absolute bottom-2 right-2 flex space-x-2">
+                  <button
+                    @click="playTrack(track.uri)"
+                    class="flex-1 bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded"
+                  >
+                    Lire
+                  </button>
+                  <button
+                    @click="toggleLike(track.id)"
+                    class="p-2 text-red-500 hover:text-red-600 transition-colors duration-200"
+                  >
+                    <i class="material-icons">{{ isLiked(track.id) ? 'favorite' : 'favorite_border' }}</i>
+                  </button>
+                </div>
               </div>
               <h3 class="text-lg font-semibold truncate">{{ track?.name || 'Unknown track' }}</h3>
               <p class="text-gray-400 text-sm truncate">{{ track?.artists?.[0]?.name || 'Unknown artist' }}</p>
@@ -234,12 +152,20 @@
                   :alt="track?.name || 'Unknown track'"
                   class="w-full h-40 object-cover mb-2 rounded"
                 />
-                <button
-                  @click="playTrack(track.uri)"
-                  class="absolute bottom-2 right-2 bg-green-500 p-3 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                >
-                  <i class="material-icons">play_arrow</i>
-                </button>
+                <div class="flex space-x-2">
+                  <button
+                    @click="playTrack(track.uri)"
+                    class="flex-1 bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded"
+                  >
+                    Lire
+                  </button>
+                  <button
+                    @click="toggleLike(track.id)"
+                    class="p-2 text-red-500 hover:text-red-600 transition-colors duration-200"
+                  >
+                    <i class="material-icons">{{ isLiked(track.id) ? 'favorite' : 'favorite_border' }}</i>
+                  </button>
+                </div>
               </div>
               <h3 class="text-lg font-semibold truncate">{{ track?.name || 'Unknown track' }}</h3>
               <p class="text-gray-400 text-sm truncate">{{ track?.artists?.[0]?.name || 'Unknown artist' }}</p>
@@ -286,18 +212,13 @@ export default {
       recentlyPlayed: [],
       userPlaylists: [],
       recommendations: [],
-      searchQuery: '',
-      searchResults: {
-        artists: { items: [] },
-        tracks: { items: [] },
-        playlists: { items: [] }
-      },
-      searchTimeout: null,
       showProfileMenu: false,
       userProfile: null,
+      likedTracks: [],
+      likedPlaylistId: null,
     };
   },
-  mounted() {
+  async mounted() {
     const token = localStorage.getItem('spotify_access_token');
     if (!token) {
       console.error('Token non disponible. Veuillez vous reconnecter.');
@@ -316,11 +237,13 @@ export default {
     };
 
     // Fetch user data
-    this.getUserInfo();
-    this.getRecentlyPlayed();
-    this.loadLibrary();
-    this.getRecommendations();
-    this.getUserProfile();
+    await this.getUserInfo();
+    await this.getRecentlyPlayed();
+    await this.loadLibrary();
+    await this.getRecommendations();
+    await this.getUserProfile();
+    await this.findLikedPlaylist();
+    await this.getLikedTracks();
   },
   computed: {
     greetingMessage() {
@@ -573,40 +496,6 @@ export default {
         console.error('Erreur lors de la mise en pause :', error.response?.data || error.message);
       }
     },
-    async handleSearch() {
-      if (this.searchTimeout) {
-        clearTimeout(this.searchTimeout);
-      }
-
-      if (!this.searchQuery.trim()) {
-        this.searchResults = {
-          artists: { items: [] },
-          tracks: { items: [] },
-          playlists: { items: [] }
-        };
-        return;
-      }
-
-      this.searchTimeout = setTimeout(async () => {
-        try {
-          const token = localStorage.getItem('spotify_access_token');
-          const response = await this.$axios.$get('https://api.spotify.com/v1/search', {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-            params: {
-              q: this.searchQuery,
-              type: 'artist,track,playlist',
-              limit: 5,
-            },
-          });
-
-          this.searchResults = response;
-        } catch (error) {
-          console.error('Erreur lors de la recherche :', error.response?.data || error.message);
-        }
-      }, 300);
-    },
     async playPlaylist(uri) {
       try {
         const token = localStorage.getItem('spotify_access_token');
@@ -681,6 +570,106 @@ export default {
         console.error('Error during logout:', error);
       }
     },
+    async findLikedPlaylist() {
+      try {
+        const token = localStorage.getItem('spotify_access_token');
+        const response = await this.$axios.$get('https://api.spotify.com/v1/me/playlists', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          params: {
+            limit: 50,
+          },
+        });
+
+        const likedPlaylist = response.items.find(playlist => playlist.name === 'Titres likés');
+        if (likedPlaylist) {
+          this.likedPlaylistId = likedPlaylist.id;
+        } else {
+          // Create the playlist if it doesn't exist
+          const createResponse = await this.$axios.$post(
+            'https://api.spotify.com/v1/me/playlists',
+            {
+              name: 'Titres likés',
+              public: false,
+              description: 'Vos titres préférés',
+            },
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'application/json',
+              },
+            }
+          );
+          this.likedPlaylistId = createResponse.id;
+        }
+      } catch (error) {
+        console.error('Error finding/creating liked playlist:', error);
+      }
+    },
+    async getLikedTracks() {
+      if (!this.likedPlaylistId) return;
+
+      try {
+        const token = localStorage.getItem('spotify_access_token');
+        const response = await this.$axios.$get(`https://api.spotify.com/v1/playlists/${this.likedPlaylistId}/tracks`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        this.likedTracks = response.items.map(item => item.track.id);
+      } catch (error) {
+        console.error('Error getting liked tracks:', error);
+      }
+    },
+    isLiked(trackId) {
+      return this.likedTracks.includes(trackId);
+    },
+    async toggleLike(trackId) {
+      if (!this.likedPlaylistId) {
+        await this.findLikedPlaylist();
+      }
+
+      try {
+        const token = localStorage.getItem('spotify_access_token');
+        const isCurrentlyLiked = this.isLiked(trackId);
+
+        if (isCurrentlyLiked) {
+          // Remove from liked tracks
+          await this.$axios.$delete(
+            `https://api.spotify.com/v1/playlists/${this.likedPlaylistId}/tracks`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'application/json',
+              },
+              data: {
+                tracks: [{ uri: `spotify:track:${trackId}` }],
+              },
+            }
+          );
+          this.likedTracks = this.likedTracks.filter(id => id !== trackId);
+        } else {
+          // Add to liked tracks
+          await this.$axios.$post(
+            `https://api.spotify.com/v1/playlists/${this.likedPlaylistId}/tracks`,
+            {
+              uris: [`spotify:track:${trackId}`],
+            },
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'application/json',
+              },
+            }
+          );
+          this.likedTracks.push(trackId);
+        }
+      } catch (error) {
+        console.error('Error toggling like:', error);
+      }
+    },
   },
 };
 </script>
@@ -700,5 +689,120 @@ export default {
   direction: ltr;
   -webkit-font-feature-settings: 'liga';
   -webkit-font-smoothing: antialiased;
+}
+
+/* Updated styles to match landing page */
+.bg-black {
+  background: linear-gradient(135deg, #0A192F 0%, #020c1b 100%);
+}
+
+.bg-gray-900 {
+  background: rgba(10, 25, 47, 0.7);
+  border: 1px solid rgba(100, 255, 218, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+.bg-gray-800 {
+  background: rgba(10, 25, 47, 0.7);
+  border: 1px solid rgba(100, 255, 218, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+.hover\:bg-gray-700:hover {
+  background: rgba(100, 255, 218, 0.1);
+  border-color: rgba(100, 255, 218, 0.3);
+  box-shadow: 0 5px 15px rgba(100, 255, 218, 0.1);
+}
+
+.text-green-500 {
+  color: #64FFDA;
+}
+
+.hover\:text-green-500:hover {
+  color: #4CC9F0;
+}
+
+.bg-green-500 {
+  background-color: #64FFDA;
+  color: #0A192F;
+}
+
+.hover\:bg-green-600:hover {
+  background-color: #4CC9F0;
+}
+
+/* Card hover effects */
+.hover\:scale-105:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(100, 255, 218, 0.1);
+}
+
+/* Search bar styling */
+input[type="text"] {
+  background: rgba(10, 25, 47, 0.7);
+  border: 1px solid rgba(100, 255, 218, 0.1);
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+}
+
+input[type="text"]:focus {
+  border-color: #64FFDA;
+  box-shadow: 0 0 0 2px rgba(100, 255, 218, 0.2);
+}
+
+/* Profile section styling */
+.group:hover .group-hover\:opacity-100 {
+  opacity: 1;
+  transform: translateY(-2px);
+}
+
+/* Footer player styling */
+footer {
+  background: rgba(10, 25, 47, 0.95);
+  border-top: 1px solid rgba(100, 255, 218, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+footer button {
+  transition: all 0.3s ease;
+}
+
+footer button:hover {
+  transform: translateY(-2px);
+}
+
+/* Grid spacing */
+.grid {
+  gap: 2rem;
+}
+
+/* Section transitions */
+section {
+  transition: all 0.3s ease;
+}
+
+/* Play button styling */
+.absolute.bottom-2.right-2 {
+  background: rgba(100, 255, 218, 0.9);
+  transition: all 0.3s ease;
+}
+
+.absolute.bottom-2.right-2:hover {
+  background: #4CC9F0;
+  transform: scale(1.1);
+}
+
+/* Profile dropdown styling */
+.shadow-xl {
+  box-shadow: 0 10px 25px rgba(100, 255, 218, 0.1);
+}
+
+.border-gray-700 {
+  border-color: rgba(100, 255, 218, 0.1);
+}
+
+/* Loading spinner */
+.animate-spin {
+  color: #64FFDA;
 }
 </style>

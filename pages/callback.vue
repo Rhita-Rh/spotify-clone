@@ -23,7 +23,7 @@
           new URLSearchParams({
             grant_type: 'authorization_code',
             code: code,
-            redirect_uri: 'https://e65c-41-137-204-12.ngrok-free.app/callback', // URI de redirection
+            redirect_uri: 'https://69bb-197-230-122-193.ngrok-free.app/callback', // URI de redirection
             client_id: '5a2ce8d7cc9d448d8d923a47f247f7af', // Remplacez par votre Client ID Spotify
             client_secret: 'e5809d0cf97b4227b9703dc9bc62a7c7', // Remplacez par votre Client Secret Spotify
           }),

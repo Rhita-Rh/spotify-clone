@@ -63,7 +63,7 @@ export default {
         ],
         grantType: 'authorization_code',
         responseType: 'code',
-        redirectUri: 'https://e65c-41-137-204-12.ngrok-free.app/callback',
+        redirectUri: 'https://69bb-197-230-122-193.ngrok-free.app/callback',
       },
     },
   },

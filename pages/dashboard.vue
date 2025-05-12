@@ -43,10 +43,9 @@
               </button>
               <button
                 @click="toggleLike(item.id)"
-                class="p-2 rounded-full hover:bg-gray-600 transition-colors duration-200"
-                :class="{ 'text-red-500': likedTracks.has(item.id), 'text-gray-400': !likedTracks.has(item.id) }"
+                class="p-2 text-red-500 hover:text-red-600 transition-colors duration-200"
               >
-                <i class="material-icons">{{ likedTracks.has(item.id) ? 'favorite' : 'favorite_border' }}</i>
+                <i class="material-icons">{{ isLiked(item.id) ? 'favorite' : 'favorite_border' }}</i>
               </button>
               <div class="relative">
                 <button
@@ -73,10 +72,10 @@
                       </div>
                       <div class="flex-1 min-w-0">
                         <p class="text-sm font-medium text-white truncate">Titres likés</p>
-                        <p class="text-xs text-gray-400">{{ likedTracks.size }} titres</p>
+                        <p class="text-xs text-gray-400">{{ likedTracks.length }} titres</p>
                       </div>
                       <i class="material-icons text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                        {{ likedTracks.has(item.id) ? 'remove' : 'add' }}
+                        {{ isLiked(item.id) ? 'remove' : 'add' }}
                       </i>
                     </div>
                     <div v-if="userPlaylists.length === 0" class="p-4 text-center text-gray-400 text-sm">
@@ -114,6 +113,37 @@
             </div>
           </div>
         </div>
+        <!-- Static Albums Section -->
+        <div v-else-if="!loading && !query" class="space-y-6">
+          <h2 class="text-2xl font-bold mb-4">Albums populaires</h2>
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <div
+              v-for="album in staticAlbums"
+              :key="album.id"
+              class="bg-gray-800 p-4 rounded-lg hover:bg-gray-700 transition-transform duration-200 hover:scale-105"
+            >
+              <div :class="[album.album.color, 'w-full h-48 rounded mb-4 flex items-center justify-center']">
+                <span class="text-white text-2xl font-bold">{{ album.name }}</span>
+              </div>
+              <h3 class="text-lg font-semibold mb-1">{{ album.name }}</h3>
+              <p class="text-gray-400 mb-2">{{ album.artists[0].name }}</p>
+              <div class="flex space-x-2">
+                <button
+                  @click="playTrack(album.uri)"
+                  class="flex-1 bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded"
+                >
+                  Lire
+                </button>
+                <button
+                  @click="toggleLike(album.id)"
+                  class="p-2 text-red-500 hover:text-red-600 transition-colors duration-200"
+                >
+                  <i class="material-icons">{{ isLiked(album.id) ? 'favorite' : 'favorite_border' }}</i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
         <div v-else-if="loading" class="text-center mt-8">
           <svg class="animate-spin h-8 w-8 text-white mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
             <circle
@@ -133,25 +163,58 @@
           <p class="mt-4">Recherche en cours...</p>
         </div>
       </section>
+    </main>
 
-      <!-- Lecteur en bas de page -->
-      <footer v-if="currentTrack" class="fixed bottom-0 left-0 right-0 bg-gray-800 p-4 flex items-center">
+    <!-- Static Footer Player -->
+    <footer class="fixed bottom-0 left-0 right-0 bg-gray-800 p-4 flex items-center">
+      <div class="flex items-center w-1/4">
         <img
-          :src="currentTrack.albumCover || require('~/assets/default-album.png')"
-          :alt="`Pochette de l'album ${currentTrack.albumName}`"
+          src="https://i.scdn.co/image/ab67616d0000b273e2e352d5c4f0b0b0c0c0c0c0"
+          alt="Album Cover"
           class="w-16 h-16 object-cover mr-4"
         />
-        <div class="flex-1">
-          <p class="text-white font-semibold">{{ currentTrack.name }}</p>
-          <p class="text-gray-400">{{ currentTrack.artist }}</p>
+        <div>
+          <p class="text-white font-semibold">Thriller</p>
+          <p class="text-gray-400">Michael Jackson</p>
         </div>
-        <div class="flex items-center space-x-4">
-          <button @click="pausePlayback" class="text-white hover:text-green-500">
-            <span class="material-icons text-3xl">pause_circle_filled</span>
+      </div>
+
+      <div class="flex-1 flex flex-col items-center">
+        <div class="flex items-center space-x-4 mb-2">
+          <button class="text-gray-400 hover:text-white">
+            <i class="material-icons">shuffle</i>
+          </button>
+          <button class="text-gray-400 hover:text-white">
+            <i class="material-icons">skip_previous</i>
+          </button>
+          <button class="text-white hover:text-green-500">
+            <i class="material-icons text-4xl">play_circle_filled</i>
+          </button>
+          <button class="text-gray-400 hover:text-white">
+            <i class="material-icons">skip_next</i>
+          </button>
+          <button class="text-gray-400 hover:text-white">
+            <i class="material-icons">repeat</i>
           </button>
         </div>
-      </footer>
-    </main>
+        <div class="w-full flex items-center space-x-2">
+          <span class="text-xs text-gray-400">0:00</span>
+          <div class="flex-1 h-1 bg-gray-600 rounded-full">
+            <div class="h-full bg-white rounded-full w-1/3"></div>
+          </div>
+          <span class="text-xs text-gray-400">3:42</span>
+        </div>
+      </div>
+
+      <div class="w-1/4 flex justify-end items-center space-x-4">
+        <button class="text-gray-400 hover:text-white">
+          <i class="material-icons">volume_up</i>
+        </button>
+        <div class="w-24 h-1 bg-gray-600 rounded-full">
+          <div class="h-full bg-white rounded-full w-1/2"></div>
+        </div>
+      </div>
+    </footer>
   </div>
 </template>
 
@@ -171,11 +234,157 @@ export default {
       query: '',
       results: null,
       loading: false,
-      likedTracks: new Set(),
+      likedTracks: [],
+      likedPlaylistId: null,
       showAddToPlaylistMenu: null,
       showCreatePlaylistModal: false,
       userPlaylists: [],
+      searchTimeout: null,
+      staticAlbums: [
+        {
+          id: 'static1',
+          name: 'Thriller',
+          artists: [{ name: 'Michael Jackson' }],
+          album: {
+            name: 'Thriller',
+            color: 'bg-red-600'
+          },
+          uri: 'spotify:album:2ANVost0y2y52ema1E9xAZ'
+        },
+        {
+          id: 'static2',
+          name: 'Abbey Road',
+          artists: [{ name: 'The Beatles' }],
+          album: {
+            name: 'Abbey Road',
+            color: 'bg-yellow-500'
+          },
+          uri: 'spotify:album:0ETFjACtuP2ADo6LFhL6HN'
+        },
+        {
+          id: 'static3',
+          name: 'The Dark Side of the Moon',
+          artists: [{ name: 'Pink Floyd' }],
+          album: {
+            name: 'The Dark Side of the Moon',
+            color: 'bg-purple-700'
+          },
+          uri: 'spotify:album:4LH4d3cOWNNsVw41Gqt2kv'
+        },
+        {
+          id: 'static4',
+          name: 'Back to Black',
+          artists: [{ name: 'Amy Winehouse' }],
+          album: {
+            name: 'Back to Black',
+            color: 'bg-gray-900'
+          },
+          uri: 'spotify:album:097eYvf9NKyFJoKhIBoXnz'
+        },
+        {
+          id: 'static5',
+          name: 'Rumours',
+          artists: [{ name: 'Fleetwood Mac' }],
+          album: {
+            name: 'Rumours',
+            color: 'bg-blue-500'
+          },
+          uri: 'spotify:album:1bt6q2SruMsBtcerNVtpZB'
+        },
+        {
+          id: 'static6',
+          name: 'Purple Rain',
+          artists: [{ name: 'Prince' }],
+          album: {
+            name: 'Purple Rain',
+            color: 'bg-purple-500'
+          },
+          uri: 'spotify:album:7n8LkQALQc5dR1hHtFX5c5'
+        },
+        {
+          id: 'static7',
+          name: 'Nevermind',
+          artists: [{ name: 'Nirvana' }],
+          album: {
+            name: 'Nevermind',
+            color: 'bg-blue-600'
+          },
+          uri: 'spotify:album:2guirTSEqLizK7j9i1MTTZ'
+        },
+        {
+          id: 'static8',
+          name: 'The Joshua Tree',
+          artists: [{ name: 'U2' }],
+          album: {
+            name: 'The Joshua Tree',
+            color: 'bg-orange-600'
+          },
+          uri: 'spotify:album:5vBZRYu2GLA65nfxBvG1a7'
+        },
+        {
+          id: 'static9',
+          name: 'Born to Run',
+          artists: [{ name: 'Bruce Springsteen' }],
+          album: {
+            name: 'Born to Run',
+            color: 'bg-yellow-600'
+          },
+          uri: 'spotify:album:3lYrywFU7t8Uo4zPtfQ33h'
+        },
+        {
+          id: 'static10',
+          name: 'Kind of Blue',
+          artists: [{ name: 'Miles Davis' }],
+          album: {
+            name: 'Kind of Blue',
+            color: 'bg-blue-800'
+          },
+          uri: 'spotify:album:1weenld61qoidwYuZ1GESA'
+        },
+        {
+          id: 'static11',
+          name: 'The Wall',
+          artists: [{ name: 'Pink Floyd' }],
+          album: {
+            name: 'The Wall',
+            color: 'bg-gray-700'
+          },
+          uri: 'spotify:album:5Dbax7G8SWrP9xyzkOvy2F'
+        },
+        {
+          id: 'static12',
+          name: 'Like a Prayer',
+          artists: [{ name: 'Madonna' }],
+          album: {
+            name: 'Like a Prayer',
+            color: 'bg-pink-600'
+          },
+          uri: 'spotify:album:48AGkmM7iO4jrELRnNZGPV'
+        }
+      ]
     };
+  },
+  watch: {
+    query(newQuery) {
+      // Clear previous timeout
+      if (this.searchTimeout) {
+        clearTimeout(this.searchTimeout);
+      }
+      
+      // If query is empty, show static albums
+      if (!newQuery.trim()) {
+        this.results = null;
+        return;
+      }
+
+      // Set loading state
+      this.loading = true;
+
+      // Set new timeout for search
+      this.searchTimeout = setTimeout(() => {
+        this.search();
+      }, 300); // 300ms debounce
+    }
   },
   async mounted() {
     const token = localStorage.getItem('spotify_access_token');
@@ -192,7 +401,8 @@ export default {
       };
     }
 
-    await this.loadLikedTracks();
+    await this.findLikedPlaylist();
+    await this.getLikedTracks();
     await this.loadUserPlaylists();
   },
   methods: {
@@ -237,7 +447,11 @@ export default {
     },
 
     async search() {
-      this.loading = true;
+      if (!this.query.trim()) {
+        this.results = null;
+        this.loading = false;
+        return;
+      }
 
       try {
         const token = localStorage.getItem('spotify_access_token');
@@ -249,7 +463,11 @@ export default {
         const response = await this.$axios.$get(
           'https://api.spotify.com/v1/search',
           {
-            params: { q: this.query, type: 'track' },
+            params: { 
+              q: this.query, 
+              type: 'track',
+              limit: 20 // Increased limit for better results
+            },
             headers: {
               Authorization: `Bearer ${token}`,
             },
@@ -259,6 +477,9 @@ export default {
         this.results = response.tracks?.items || [];
       } catch (error) {
         console.error('Erreur lors de la recherche :', error.response?.data || error.message);
+        if (this.$toast) {
+          this.$toast.error('Erreur lors de la recherche');
+        }
       } finally {
         this.loading = false;
       }
@@ -268,7 +489,7 @@ export default {
       try {
         const token = localStorage.getItem('spotify_access_token');
         if (!this.deviceId) {
-          console.error('Device ID non disponible. Le lecteur n’est pas prêt.');
+          console.error("Device ID non disponible. Le lecteur n'est pas prêt.");
           return;
         }
 
@@ -315,84 +536,10 @@ export default {
       }
     },
 
-    async toggleLike(trackId) {
+    async findLikedPlaylist() {
       try {
         const token = localStorage.getItem('spotify_access_token');
-        if (!token) {
-          console.error('No access token available');
-          return;
-        }
-
-        const isLiked = this.likedTracks.has(trackId);
-        console.log(`Toggling like for track ${trackId}, currently liked:`, isLiked);
-
-        if (isLiked) {
-          // Remove from liked tracks
-          await this.$axios.$delete(
-            'https://api.spotify.com/v1/me/tracks',
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-                'Content-Type': 'application/json',
-              },
-              data: {
-                ids: [trackId],
-              },
-            }
-          );
-          this.likedTracks.delete(trackId);
-        } else {
-          // Add to liked tracks
-          await this.$axios.$put(
-            'https://api.spotify.com/v1/me/tracks',
-            {
-              ids: [trackId],
-            },
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-                'Content-Type': 'application/json',
-              },
-            }
-          );
-          this.likedTracks.add(trackId);
-        }
-
-        // Update the track's liked status in search results
-        if (this.results) {
-          const trackIndex = this.results.findIndex(t => t.id === trackId);
-          if (trackIndex !== -1) {
-            this.results[trackIndex].isLiked = !isLiked;
-          }
-        }
-
-        // Force a re-render
-        this.$forceUpdate();
-
-        // Show success message
-        if (this.$toast) {
-          this.$toast.success(isLiked ? 'Morceau retiré des titres likés' : 'Morceau ajouté aux titres likés');
-        }
-
-        // Reload liked tracks to ensure everything is in sync
-        await this.loadLikedTracks();
-      } catch (error) {
-        console.error('Error toggling like:', error.response?.data || error.message);
-        if (this.$toast) {
-          this.$toast.error('Erreur lors de la modification des titres likés');
-        }
-      }
-    },
-
-    async loadLikedTracks() {
-      try {
-        const token = localStorage.getItem('spotify_access_token');
-        if (!token) {
-          console.error('No access token available');
-          return;
-        }
-
-        const response = await this.$axios.$get('https://api.spotify.com/v1/me/tracks', {
+        const response = await this.$axios.$get('https://api.spotify.com/v1/me/playlists', {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -401,19 +548,95 @@ export default {
           },
         });
 
-        if (response && response.items) {
-          const trackIds = response.items.map(item => item.track.id);
-          this.likedTracks = new Set(trackIds);
-          
-          // Update liked status in search results
-          if (this.results) {
-            this.results.forEach(track => {
-              track.isLiked = this.likedTracks.has(track.id);
-            });
-          }
+        const likedPlaylist = response.items.find(playlist => playlist.name === 'Titres likés');
+        if (likedPlaylist) {
+          this.likedPlaylistId = likedPlaylist.id;
+        } else {
+          // Create the playlist if it doesn't exist
+          const createResponse = await this.$axios.$post(
+            'https://api.spotify.com/v1/me/playlists',
+            {
+              name: 'Titres likés',
+              public: false,
+              description: 'Vos titres préférés',
+            },
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'application/json',
+              },
+            }
+          );
+          this.likedPlaylistId = createResponse.id;
         }
       } catch (error) {
-        console.error('Error loading liked tracks:', error.response?.data || error.message);
+        console.error('Error finding/creating liked playlist:', error);
+      }
+    },
+
+    async getLikedTracks() {
+      if (!this.likedPlaylistId) return;
+
+      try {
+        const token = localStorage.getItem('spotify_access_token');
+        const response = await this.$axios.$get(`https://api.spotify.com/v1/playlists/${this.likedPlaylistId}/tracks`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        this.likedTracks = response.items.map(item => item.track.id);
+      } catch (error) {
+        console.error('Error getting liked tracks:', error);
+      }
+    },
+
+    isLiked(trackId) {
+      return this.likedTracks.includes(trackId);
+    },
+
+    async toggleLike(trackId) {
+      if (!this.likedPlaylistId) {
+        await this.findLikedPlaylist();
+      }
+
+      try {
+        const token = localStorage.getItem('spotify_access_token');
+        const isCurrentlyLiked = this.isLiked(trackId);
+
+        if (isCurrentlyLiked) {
+          // Remove from liked tracks
+          await this.$axios.$delete(
+            `https://api.spotify.com/v1/playlists/${this.likedPlaylistId}/tracks`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'application/json',
+              },
+              data: {
+                tracks: [{ uri: `spotify:track:${trackId}` }],
+              },
+            }
+          );
+          this.likedTracks = this.likedTracks.filter(id => id !== trackId);
+        } else {
+          // Add to liked tracks
+          await this.$axios.$post(
+            `https://api.spotify.com/v1/playlists/${this.likedPlaylistId}/tracks`,
+            {
+              uris: [`spotify:track:${trackId}`],
+            },
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'application/json',
+              },
+            }
+          );
+          this.likedTracks.push(trackId);
+        }
+      } catch (error) {
+        console.error('Error toggling like:', error);
       }
     },
 
