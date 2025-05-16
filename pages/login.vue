@@ -34,7 +34,7 @@ export default {
   methods: {
     redirectToSpotify() {
       const clientId = '5a2ce8d7cc9d448d8d923a47f247f7af';
-      const redirectUri = 'https://69bb-197-230-122-193.ngrok-free.app/callback';
+      const redirectUri = 'https://neon-kelpie-58d58d.netlify.app/callback';
       const scopes = [
         'streaming',
         'user-read-email',
