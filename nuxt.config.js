@@ -63,7 +63,7 @@ export default {
         ],
         grantType: 'authorization_code',
         responseType: 'code',
-        redirectUri: 'https://69bb-197-230-122-193.ngrok-free.app/callback',
+        redirectUri: 'https://neon-kelpie-58d58d.netlify.app/callback',
       },
     },
   },
